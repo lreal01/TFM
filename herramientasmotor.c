@@ -128,7 +128,7 @@ PI_THREAD(Guardado_Posicion) {
 			}
 			fprintf(posiciones, "%i,%i", pos1, pos2);
 			fclose(posiciones);
-			delay(1500);
+			delay(500);
 			j=1;
 		}
 		if(j==1){
@@ -512,10 +512,6 @@ void posicionamiento(){
 	delay(200);
 	digitalWrite (EN1, LOW);
 	digitalWrite (EN2, LOW);
-	
-	lectura_posicion();
-	printf("Posicionamiento terminado.\n Actualmente los motores se encuentran en:\n");
-	printf("Motor 1: %i mm Motor 2: %i mm\n", pos1, pos2);
 	
 	
 }

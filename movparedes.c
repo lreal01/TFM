@@ -23,7 +23,7 @@ int pos2;
 FILE* posiciones;
 
 int k = 25600; // número de pasos en los que se sivide una vuelta
-int f0 = 200000; //200 kHz para los posicionamientos rápidos
+int f0 = 20000; //20 kHz para los posicionamientos rápidos
 
 int interruptor1_m, interruptor1_nm, interruptor2_m, interruptor2_nm;
 int i1, i2, n_pasos1, n_pasos2, tdelay1, tdelay2, sgn1, sgn2, count1, count2;
@@ -31,18 +31,18 @@ int num_mot;
 
 int reset;
 
-PI_THREAD(Lectura_interruptores) {
+PI_THREAD(Lectura_interruptores){
 	interruptor1_m = 0;
 	interruptor1_nm = 0;
 	interruptor2_m = 0;
 	interruptor2_nm = 0;
-	for (;;) {
+	for(;;){
 		int j = 0;
 		int a1 = 0;
 		int a2 = 0;
 		int a3 = 0;
 		int a4 = 0;
-		while (j < 5) {
+		while(j<5){
 			delay(20);
 			a1 += digitalRead(FINAL1_M);
 			a2 += digitalRead(FINAL1_NM);
@@ -50,41 +50,41 @@ PI_THREAD(Lectura_interruptores) {
 			a4 += digitalRead(FINAL2_NM);
 			j++;
 		}
-		if (a1 == 5) {
+		if(a1==5){
 			interruptor1_m = 1;
-			pos1 = 0;
+			pos1=0;
 			//printf("Motor 1 en extremo motor.\n");
-			if (reset == 0) { n_pasos1 = -1; }
+			if(reset==0){n_pasos1 = -1;}
 		}
-		else { interruptor1_m = 0; }
-		if (a2 == 5) {
+		else{interruptor1_m = 0;}
+		if(a2==5){
 			interruptor1_nm = 1;
-			pos1 = 200;
+			pos1=200;
 			//printf("Motor 1 en extremo no motor.\n");
-			if (reset == 0) { n_pasos1 = -1; }
+			if(reset==0){n_pasos1 = -1;}
 		}
-		else { interruptor1_nm = 0; }
-		if (a3 == 5) {
+		else {interruptor1_nm = 0; }
+		if(a3==5){
 			interruptor2_m = 1;
-			pos2 = 0;
+			pos2=0;
 			//printf("Motor 2 en extremo motor.\n");
-			if (reset == 0) { n_pasos2 = -1; }
+			if(reset==0){n_pasos2 = -1;}
 		}
-		else { interruptor2_m = 0; }
-		if (a4 == 5) {
+		else {interruptor2_m = 0; }
+		if(a4==5){
 			interruptor2_nm = 1;
-			pos2 = 200;
+			pos2=200;
 			//printf("Motor 2 en extremo no motor.\n");
-			if (reset == 0) { n_pasos2 = -1; }
+			if(reset==0){n_pasos2 = -1;}
 		}
-		else { interruptor2_nm = 0; }
+		else {interruptor2_nm = 0; }
 	}
 }
 
-PI_THREAD(Motor1) {
-	for (;;) {
+PI_THREAD(Motor1){
+	for(;;){
 		i1 = 0;
-		while (i1 < n_pasos1) {
+		while(i1 < n_pasos1){
 			digitalWrite(STEP1, LOW);
 			delayMicroseconds(tdelay1);
 			digitalWrite(STEP1, HIGH);
@@ -127,11 +127,11 @@ PI_THREAD(Guardado_Posicion) {
 			}
 			fprintf(posiciones, "%i,%i", pos1, pos2);
 			fclose(posiciones);
-			delay(1500);
-			j = 1;
+			delay(500);
+			j=1;
 		}
-		if (j == 1) {
-
+		if(j==1){
+			
 			posiciones = fopen("posiciones.txt", "w");
 			while (posiciones == NULL) { //Por si hubiera ocurrido un error creando el archivo
 				posiciones = fopen("posiciones.txt", "w");
@@ -139,48 +139,50 @@ PI_THREAD(Guardado_Posicion) {
 			fprintf(posiciones, "%i,%i", pos1, pos2);
 			fclose(posiciones);
 		}
-		j = 0;
+		j=0;
 	}
 }
 
 
-void lectura_posicion() {
+void lectura_posicion(){
 	char data[7];
-
-	posiciones = fopen("posiciones.txt", "r");
-	while (posiciones == NULL) { //Por si hubiera ocurrido un error creando el archivo
-		posiciones = fopen("posiciones.txt", "r");
+	
+	posiciones = fopen("posiciones.txt","r"); 
+	while(posiciones==NULL){ //Por si hubiera ocurrido un error creando el archivo
+		posiciones = fopen("posiciones.txt","r"); 
 	}
-
-	int j = 0;
-	while (!feof(posiciones)) {
-		fread(&data[j], sizeof(char), 1, posiciones);
+	 
+	int j=0;
+	while(!feof(posiciones)){
+		fread(&data[j],sizeof(char),1,posiciones);
 		//printf("%c %i\n",data[j],j);
 		j++;
 	}
 	fclose(posiciones);
+	
+	sscanf(data, "%d,%d\n",&pos1,&pos2);
 
-	sscanf(data, "%d,%d\n", &pos1, &pos2);
-
-	if (pos1 < 0 || pos1>200) {
+	if (pos1 < 0 || pos1>200){
 		printf("ERROR FATAL. POR FAVOR, REALICE UN RESETEO.");
 	}
 	if (pos2 < 0 || pos2>200) {
 		printf("ERROR FATAL. POR FAVOR, REALICE UN RESETEO.");
 	}
-
+	
+	return;
+	
 	//printf("pos 1 %i\n",pos1);
 	//printf("pos 2 %i\n",pos2);
-
-}
+	
+ }
 	
 
 void posicionamiento_inicial() {
 
 	int pos = -1;
 
-	tdelay1 = 1 / (2 * f0);
-	tdelay2 = 1 / (2 * f0);
+	tdelay1 = 1000*1000 / (2 * f0);
+	tdelay2 = 1000*1000 / (2 * f0);
 
 	while (pos < 0 || pos>200) {
 		printf("¿En qué posición desea comenzar? (0-200) mm\n");
@@ -202,7 +204,7 @@ void posicionamiento_inicial() {
 		sgn1 = -1;
 		sgn2 = -1;
 	}
-	if (d > 0) { //Positiva es hacia no motor
+	if (d > 0) { //Positiva es hacia motor
 		digitalWrite(DIR1, HIGH);
 		digitalWrite(DIR2, HIGH);
 		sgn1 = 1;
@@ -231,10 +233,6 @@ void posicionamiento_inicial() {
 	digitalWrite(EN1, LOW);
 	digitalWrite(EN2, LOW);
 
-	lectura_posicion();
-	printf("Posicionamiento terminado.\n Actualmente los motores se encuentran en:\n");
-	printf("Motor 1: %i mm Motor 2: %i mm\n", pos1, pos2);
-
 }
 
 void desplazamiento() {
@@ -251,7 +249,6 @@ void desplazamiento() {
 		printf("Signo positivo->compresión    Signo negativo -> extensión\n");
 		scanf("%i", &d);
 	}
-	
 
 	printf("¿Cuál será la tasa de deformación? Introduzca un valor 1-20000 mm/h.\n");
 	scanf("%i", &tasa);
@@ -263,11 +260,11 @@ void desplazamiento() {
 	}
 
 
-	int f = tasa * 25600 / (2 * 3600); //frecuencia en s^-1
+	int f = tasa * k / (2 * 3600); //frecuencia en s^-1
 	tdelay1 = 1000 * 1000 / (2 * f);
 	tdelay2 = 1000 * 1000 / (2 * f);
 
-	//Habilito motores 
+	//Habilito el motore
 
 	digitalWrite(EN1, HIGH);
 	digitalWrite(EN2, HIGH);
@@ -308,11 +305,8 @@ void desplazamiento() {
 	delay(200);
 	digitalWrite(EN1, LOW);
 	digitalWrite(EN2, LOW);
-	
 
 	lectura_posicion();
-	printf("Posicionamiento terminado.\n Actualmente los motores se encuentran en:\n");
-	printf("Motor 1: %i mm Motor 2: %i mm\n", pos1, pos2);
 
 }
 
@@ -346,8 +340,6 @@ int main()
 	digitalWrite(DIR2, HIGH);
 	digitalWrite(EN2, LOW);
 
-	lectura_posicion();
-
 	//Arranque hilos
 	piThreadCreate(Lectura_interruptores);
 	piThreadCreate(Motor1);
@@ -373,7 +365,7 @@ int main()
 	printf("¿Quiere comenzar el experimento desde el punto actual?\n");
 	printf("Sí(1) No(0)\n");
 	scanf("%i",&mov);
-	while(mov!=1||mov!=0){
+	while(mov!=1&&mov!=0){
 		printf("Pruebe de nuevo.\n");
 		printf("¿Quiere comenzar el experimento desde el punto actual?\n");
 		printf("Sí(1) No(0)\n");
@@ -382,16 +374,24 @@ int main()
 	
 	if (mov == 0) { //Colocar posición inicial
 		posicionamiento_inicial();
+		
+		delay(1500);
+		lectura_posicion();
+		printf("Posicionamiento terminado.\n Actualmente los motores se encuentran en:\n");
+		printf("Motor 1: %i mm Motor 2: %i mm\n", pos1, pos2);
+		
 	}
-
+	
 	printf("Puede proceder a colocar el material en el interior.\n");
 	printf("Introduzca un 1 cuando haya acabado.");
 	int seguridad = 0;
-	while (seguridad != 1) {
+	while (seguridad!=1) {
 		scanf("%i", &seguridad);
 	}
 
 	desplazamiento();
+	
+	delay(1500);
 	
 	printf("Experimento concluido.\n");
 	

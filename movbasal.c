@@ -24,7 +24,7 @@ int pos2;
 FILE* posiciones;
 
 int k = 25600;
-int f0 = 200000;
+int f0 = 20000;
 
 int interruptor1_m, interruptor1_nm, interruptor2_m, interruptor2_nm;
 int i1, i2, n_pasos1, n_pasos2, tdelay1, tdelay2, sgn1, sgn2, count1, count2;
@@ -32,18 +32,18 @@ int num_mot, inmovil;
 
 int reset;
 
-PI_THREAD(Lectura_interruptores) {
+PI_THREAD(Lectura_interruptores){
 	interruptor1_m = 0;
 	interruptor1_nm = 0;
 	interruptor2_m = 0;
 	interruptor2_nm = 0;
-	for (;;) {
+	for(;;){
 		int j = 0;
 		int a1 = 0;
 		int a2 = 0;
 		int a3 = 0;
 		int a4 = 0;
-		while (j < 5) {
+		while(j<5){
 			delay(20);
 			a1 += digitalRead(FINAL1_M);
 			a2 += digitalRead(FINAL1_NM);
@@ -51,41 +51,41 @@ PI_THREAD(Lectura_interruptores) {
 			a4 += digitalRead(FINAL2_NM);
 			j++;
 		}
-		if (a1 == 5) {
+		if(a1==5){
 			interruptor1_m = 1;
-			pos1 = 0;
+			pos1=0;
 			//printf("Motor 1 en extremo motor.\n");
-			if (reset == 0) { n_pasos1 = -1; }
+			if(reset==0){n_pasos1 = -1;}
 		}
-		else { interruptor1_m = 0; }
-		if (a2 == 5) {
+		else{interruptor1_m = 0;}
+		if(a2==5){
 			interruptor1_nm = 1;
-			pos1 = 200;
+			pos1=200;
 			//printf("Motor 1 en extremo no motor.\n");
-			if (reset == 0) { n_pasos1 = -1; }
+			if(reset==0){n_pasos1 = -1;}
 		}
-		else { interruptor1_nm = 0; }
-		if (a3 == 5) {
+		else {interruptor1_nm = 0; }
+		if(a3==5){
 			interruptor2_m = 1;
-			pos2 = 0;
+			pos2=0;
 			//printf("Motor 2 en extremo motor.\n");
-			if (reset == 0) { n_pasos2 = -1; }
+			if(reset==0){n_pasos2 = -1;}
 		}
-		else { interruptor2_m = 0; }
-		if (a4 == 5) {
+		else {interruptor2_m = 0; }
+		if(a4==5){
 			interruptor2_nm = 1;
-			pos2 = 200;
+			pos2=200;
 			//printf("Motor 2 en extremo no motor.\n");
-			if (reset == 0) { n_pasos2 = -1; }
+			if(reset==0){n_pasos2 = -1;}
 		}
-		else { interruptor2_nm = 0; }
+		else {interruptor2_nm = 0; }
 	}
 }
 
-PI_THREAD(Motor1) {
-	for (;;) {
+PI_THREAD(Motor1){
+	for(;;){
 		i1 = 0;
-		while (i1 < n_pasos1) {
+		while(i1<n_pasos1){
 			digitalWrite(STEP1, LOW);
 			delayMicroseconds(tdelay1);
 			digitalWrite(STEP1, HIGH);
@@ -129,10 +129,10 @@ PI_THREAD(Guardado_Posicion) {
 			fprintf(posiciones, "%i,%i", pos1, pos2);
 			fclose(posiciones);
 			delay(1500);
-			j = 1;
+			j=1;
 		}
-		if (j == 1) {
-
+		if(j==1){
+			
 			posiciones = fopen("posiciones.txt", "w");
 			while (posiciones == NULL) { //Por si hubiera ocurrido un error creando el archivo
 				posiciones = fopen("posiciones.txt", "w");
@@ -140,7 +140,7 @@ PI_THREAD(Guardado_Posicion) {
 			fprintf(posiciones, "%i,%i", pos1, pos2);
 			fclose(posiciones);
 		}
-		j = 0;
+		j=0;
 	}
 }
 
@@ -413,8 +413,7 @@ void posicionamiento_inicial() {
 		digitalWrite(EN2, LOW);
 
 		delay(500);
-		
-		rintf("Motor 1 colocado.\n");
+
 
 		pos = -20;
 
@@ -441,7 +440,7 @@ void posicionamiento_inicial() {
 			sgn2 = 1;
 		}
 
-		printf("Se va a proceder a mover de la máquina, por favor no se acerque ni desenchufe.\n");
+		printf("Se va a proceder a mover la máquina, por favor no se acerque ni desenchufe.\n");
 
 			delay(200);
 
@@ -466,24 +465,19 @@ void posicionamiento_inicial() {
 
 		delay(500);
 		
-		
 	}
-
-
-	lectura_posicion();
-	printf("Posicionamiento terminado.\n Actualmente los motores se encuentran en:\n");
-	printf("Motor 1: %i mm Motor 2: %i mm\n", pos1, pos2);
 
 }
 
 
 void movimiento() {
 
-	int d1, d2;
+	int d1=-30000;
+	int d2 = -300000;
 	int tasa1 = -20;
 	int tasa2 = -20;
 
-	printf("Recuerde que la distancia introducida hacia 0 es negativo y hacia 200 es positivo.");
+	printf("Recuerde que movimiento hacia 0 es negativo y hacia 200 es positivo.\n");
 	
 	if(num_mot==1){ //Si se mueve solo un motor
 		
@@ -504,7 +498,7 @@ void movimiento() {
 			}
 		
 			int f2 = tasa2 * k / (2 * 3600); //frecuencia en s^-1
-			tdelay2 = 1000 * 1000 / (2 * f2) ;
+			tdelay2 = 1000 * 1000 / (2 * f2);
 
 			//Habilito motor 2
 
@@ -560,7 +554,7 @@ void movimiento() {
 			}
 		
 			int f1 = tasa1 * k / (2 * 3600); //frecuencia en s^-1
-			tdelay1 = 1000 * 1000 / (2 * f1) ;
+			tdelay1 = 1000 * 1000 / (2 * f1);
 
 			//Habilito motor 1
 
@@ -614,7 +608,6 @@ void movimiento() {
 			printf("¿Qué distancia desea mover el motor 1?\n");
 			scanf("%i", &d1);
 		}
-
 
 		while ((d2 + pos2) < 0 || (d2 + pos2) > 200) {
 			printf("¿Qué distancia desea mover el motor 2?\n");
@@ -699,13 +692,6 @@ void movimiento() {
 		digitalWrite(EN1, LOW);
 		digitalWrite(EN2, LOW);
 	}
-	
-	
-	lectura_posicion();
-	printf("Movimiento terminado.\n Actualmente los motores se encuentran en:\n");
-	printf("Motor 1: %i mm Motor 2: %i mm\n", pos1, pos2);
-
-
 }
 
 
@@ -736,8 +722,6 @@ int main(){
 	digitalWrite(DIR2, HIGH);
 	digitalWrite(EN2, LOW);
 
-	lectura_posicion();
-
 	//Arranque hilos
 	piThreadCreate(Lectura_interruptores);
 	piThreadCreate(Motor1);
@@ -756,10 +740,6 @@ int main(){
 	printf("\n");
 
 	num_mot=0;
-	sgn1 = 0;
-	sgn2 = 0;
-
-	reset = 0;
 	
 	//Número de motores/bases que se van a mover
 	printf("Seleccione el número de motores (1 o 2) que se va a utilizar:\n");
@@ -782,7 +762,7 @@ int main(){
 	
 	int mov = -1;
 	
-	//Cambio o no de la posición última
+	//Reseteo o no de la posición última
 	printf("¿Quiere comenzar el experimento desde la posición actual?\n");
 	printf("Sí(1) No(0)\n");
 	scanf("%i",&mov);
@@ -796,6 +776,11 @@ int main(){
 	if (mov == 0) {//Si se quiere cambiar la posición inicial
 
 		posicionamiento_inicial(); //cambiar para los dos motores
+		
+		delay(1500);
+		lectura_posicion();
+		printf("Posicionamiento terminado.\n Actualmente los motores se encuentran en:\n");
+		printf("Motor 1: %i mm Motor 2: %i mm\n", pos1, pos2);
 	}
 
 	printf("Puede proceder a colocar el material en el interior.\n");
